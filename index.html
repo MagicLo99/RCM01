@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VNC Client - Mouse + Screen + Clean Exit</title>
+  <link rel="stylesheet" href="css/base.css" />
+  <style>
+    body { margin:0; background:#111; font-family:Arial; color:#eee; }
+    #screen { width:100vw; height:100vh; }
+    #status { position:fixed; top:10px; left:10px; background:rgba(0,0,0,0.7); padding:8px 14px; border-radius:4px; }
+    #controls { position:fixed; bottom:10px; left:10px; background:rgba(0,0,0,0.7); padding:10px; border-radius:6px; }
+  </style>
+</head>
+<body>
+
+<script type="module">
+  import RFB from 'https://cdn.jsdelivr.net/gh/novnc/noVNC@v1.6.0/core/rfb.js';
+
+  let rfb = null;
+  const status = document.getElementById('status');
+
+  function connect() {
+    // !!! VERY IMPORTANT !!!
+    // You almost always need websockify or similar proxy because normal VNC uses TCP 5900
+    // Browser → ws:// → websockify → tcp 5900
+    
+    // Examples of websocket URLs (choose one):
+    
+    // 1. If you run your own websockify on same machine:
+    const url = 'ws://10.1.11.16:6080';
+    
+    // 2. If someone exposed websockify publicly (not very secure with just password!)
+    // const url = 'wss://your-websockify-domain:443';  // ← most common in practice
+    
+    // 3. For local testing - many people use:
+    // const url = 'ws://10.1.11.212:6080';   // ← if you run websockify on same server
+
+    const password = 'xnebula@2026';
+    const connectBtn = document.getElementById('connectBtn');
+    const disconnectBtn = document.getElementById('disconnectBtn');
+
+    try {
+      rfb = new RFB(document.getElementById('screen'), url, {
+        credentials: { password: password },
+        // These two are the key scaling options
+        scaleViewport: true,      // ← local scaling to fit container (recommended)
+        resizeSession: true,      // ← try to change remote resolution (optional)
+        clipViewport: false,       // usually false when scaling
+        shared: true,
+        view_only: false,           // ← allows mouse & keyboard
+        scaleViewport: true,
+        resizeSession: true,
+        show_dot: true
+      });
+
+      rfb.addEventListener('connect', () => {
+        connectBtn.style.display = 'none';
+        disconnectBtn.style.display = 'inline-block';
+        showStatusTemporarily("Connected ✓", "#0f0");
+        rfb.scaleViewport = true;   // can be changed dynamically
+        rfb.resizeSession = true;
+      });
+
+      rfb.addEventListener('disconnect', (e) => {
+        connectBtn.style.display = 'inline-block';
+        disconnectBtn.style.display = 'none';
+        showStatusTemporarily('Disconnected' + (e.detail.clean ? ' cleanly' : ' with error'), "#f44");
+        rfb = null;
+      });
+
+      rfb.addEventListener('credentialsrequired', () => {
+        status.textContent = 'Waiting for credentials...';
+      });
+
+    } catch (err) {
+      status.textContent = 'Connection failed: ' + err.message;
+      console.error(err);
+    }
+  }
+
+  function showStatusTemporarily(text, color = '#aaa', duration = 3000) {
+    const status = document.getElementById('status');
+    if (!status) return;
+
+    status.textContent = text;
+    status.style.color = color;
+    status.style.display = 'block';
+
+    setTimeout(() => {
+        status.style.display = 'none';
+    }, duration);
+  }
+
+  function setStatus(text, color = '#aaa') {
+      const statusEl = document.getElementById('status');
+      if (statusEl) {
+          statusEl.textContent = text;
+          statusEl.style.color = color;
+      }
+  }
+
+  function disconnect() {
+    if (rfb) {
+        rfb.disconnect();           // ← this is correct
+        // rfb = null;                 // ← good practice
+    }
+    // Do NOT forget to update UI yourself!
+    setStatus('Disconnected', '#e63946');
+    // Optional: clear canvas
+    screen.innerHTML = '';
+    // You can also do window.close() if opened in popup
+    // window.close();
+  }
+
+  // Optional: Ctrl+Alt+Del button example
+  document.addEventListener('keydown', e => {
+    if (e.ctrlKey && e.altKey && e.key === 'Delete') {
+      if (rfb) rfb.sendCtrlAltDel();
+      e.preventDefault();
+    }
+  });
+
+  // Auto connect when page loads
+  window.onload = connect;
+  window.disconnect = disconnect;
+
+</script>
+
+<div id="status">Connecting...</div>
+
+<div id="screen">
+  <!-- noVNC will put canvas here -->
+</div>
+
+<div id="controls">
+  <span style="margin-left:5px;">
+    <button id="disconnectBtn" onclick="disconnect()" style="display: none;">Disconnect</button>
+    <button id="connectBtn" onclick="window.location.href = window.location.href" style="display: block;">Connect</button>
+  </span>
+</div>
+
+
+</body>
+</html>
