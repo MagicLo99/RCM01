@@ -36,7 +36,8 @@
     // 3. For local testing - many people use:
     // const url = 'ws://10.1.11.212:6080';   // ← if you run websockify on same server
 
-    const password = 'xnebula@2026';
+    const password = '123456';
+    // const password = 'xnebula@2026';
     const connectBtn = document.getElementById('connectBtn');
     const disconnectBtn = document.getElementById('disconnectBtn');
 
@@ -69,8 +70,37 @@
         rfb = null;
       });
 
-      rfb.addEventListener('credentialsrequired', () => {
-        status.textContent = 'Waiting for credentials...';
+      // rfb.addEventListener('credentialsrequired', () => {
+      //   status.textContent = 'Waiting for credentials...';
+      // });
+
+      // Step 2: Authentication request from server (this is your separation point)
+      rfb.addEventListener('credentialsrequired', (e) => {
+          console.log('Server requires credentials:', e.detail.types); // e.g. ["password"]
+
+          status.textContent = 'Authentication required...';
+          status.style.color = '#ffcc00';
+
+          // Option A: Show built-in noVNC prompt (default behavior if you do nothing)
+          // noVNC will automatically show its password dialog
+
+          // Option B: Custom handling (recommended for control)
+          // const password = prompt('Enter VNC Password:');
+          // if (password) {
+          //     rfb.sendCredentials({ password: password });
+          // } else {
+          //     rfb.disconnect(); // User canceled
+          // }
+
+          // Option C: Auto-supply if you know it (but still separated)
+          rfb.sendCredentials({ password: password });
+          // → You can still delay this, e.g. after user confirmation or fetch from somewhere
+      });
+
+      rfb.addEventListener('securityfailure', (e) => {
+          console.error('Security failure:', e.detail);
+          status.textContent = 'Auth failed: ' + (e.detail.reason || 'Rejected by server');
+          status.style.color = '#f44';
       });
 
     } catch (err) {
