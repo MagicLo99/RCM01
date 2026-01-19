@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VNC Connection</title>
+  <style>
+    body {
+      margin: 0;
+      background: #000;
+      overflow: hidden;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #eee;
+    }
+    #screen {
+      width: 100vw;
+      height: 100vh;
+    }
+    #status {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      background: rgba(0,0,0,0.75);
+      padding: 10px 18px;
+      border-radius: 6px;
+      z-index: 100;
+      min-width: 200px;
+    }
+    #controls {
+      position: fixed;
+      bottom: 12px;
+      left: 12px;
+      background: rgba(0,0,0,0.75);
+      padding: 10px;
+      border-radius: 6px;
+      z-index: 100;
+    }
+    button {
+      padding: 8px 16px;
+      margin-right: 8px;
+      background: #444;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #666;
+    }
+    #disconnectBtn {
+      background: #c0392b;
+    }
+    #disconnectBtn:hover {
+      background: #e74c3c;
+    }
+  </style>
+</head>
+<body>
+
+<div id="screen"></div>
+
+<div id="status">Initializing...</div>
+
+<div id="controls">
+  <button id="disconnectBtn" style="display:none;">Disconnect</button>
+</div>
+
+<script type="module">
+  import RFB from 'https://cdn.jsdelivr.net/gh/novnc/noVNC@v1.6.0/core/rfb.js';
+
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('token');
+
+  if (!token) {
+    document.getElementById('status').textContent = 'Error: No token provided in URL';
+    document.getElementById('status').style.color = '#ff4444';
+    throw new Error('Missing token parameter');
+  }
+
+  // Correct WebSocket URL format for token-based websockify
+  const wsUrl = `ws://${window.location.host}/?token=${token}`;
+
+  const screen = document.getElementById('screen');
+  const status = document.getElementById('status');
+  const disconnectBtn = document.getElementById('disconnectBtn');
+
+  let rfb = null;
+
+  function showStatus(text, color = '#aaa') {
+    status.textContent = text;
+    status.style.color = color;
+  }
+
+  function connect() {
+    if (rfb) {
+      rfb.disconnect();
+      rfb = null;
+      screen.innerHTML = '';
+    }
+
+    showStatus(`Connecting with token: ${token}...`, '#44aaff');
+
+    try {
+      rfb = new RFB(screen, wsUrl, {
+        // credentials: { password: '123456' },
+        // credentials: '123456',          // password handled server-side via token config
+        scaleViewport: true,
+        resizeSession: true,
+        clipViewport: false,
+        shared: true,
+        view_only: false,
+        show_dot: true
+      });
+
+      rfb.addEventListener('connect', () => {
+        showStatus('Connected ✓', '#00ff88');
+        disconnectBtn.style.display = 'inline-block';
+        setTimeout(() => status.style.opacity = '0', 4000);
+      });
+
+      rfb.addEventListener('disconnect', (e) => {
+        showStatus(
+          'Disconnected' + (e.detail.clean ? ' cleanly' : ' with error'),
+          '#ff4444'
+        );
+        status.style.opacity = '1';
+        disconnectBtn.style.display = 'none';
+        rfb = null;
+      });
+
+      // Step 2: Authentication request from server (this is your separation point)
+      rfb.addEventListener('credentialsrequired', (e) => {
+          console.log('Server requires credentials:', e.detail.types); // e.g. ["password"]
+
+          status.textContent = 'Authentication required...';
+          status.style.color = '#ffcc00';
+
+          // Option A: Show built-in noVNC prompt (default behavior if you do nothing)
+          // noVNC will automatically show its password dialog
+
+          // Option B: Custom handling (recommended for control)
+          // const password = prompt('Enter VNC Password:');
+          // if (password) {
+          //     rfb.sendCredentials({ password: password });
+          // } else {
+          //     rfb.disconnect(); // User canceled
+          // }
+
+          // Option C: Auto-supply if you know it (but still separated)
+          rfb.sendCredentials({ password: password });
+          // → You can still delay this, e.g. after user confirmation or fetch from somewhere
+      });
+
+      rfb.addEventListener('securityfailure', (e) => {
+        showStatus('Security failure: ' + (e.detail.reason || 'Unknown error'), '#ff4444');
+      });
+
+      rfb.addEventListener('credentialsrequired', () => {
+        showStatus('Credentials required (check server config)', '#ffcc00');
+      });
+
+    } catch (err) {
+      showStatus('Connection failed: ' + err.message, '#ff4444');
+      console.error(err);
+    }
+  }
+
+  // Disconnect button
+  disconnectBtn.onclick = () => {
+    if (rfb) {
+      rfb.disconnect();
+    }
+  };
+
+  // Ctrl+Alt+Del support
+  document.addEventListener('keydown', e => {
+    if (e.ctrlKey && e.altKey && e.key === 'Delete') {
+      if (rfb) rfb.sendCtrlAltDel();
+      e.preventDefault();
+    }
+  });
+
+  // Auto-connect on load
+  window.onload = connect;
+</script>
+
+</body>
+</html>

@@ -1,0 +1,13 @@
+# websockify TokenFile format (one token per line)
+# Format: token: target_host:target_port
+# Space after colon is REQUIRED!
+
+lab-main: 10.1.11.212:5900
+test-win10: 10.1.11.212:5900
+legacy-old: 10.1.11.212:5900
+
+# Optional: you can add password if your websockify version supports it
+# (not all versions do, so test first)
+#lab-main: 10.1.11.212:5900 password=123456
+#test-win10: 10.1.11.212:5900 password=123456
+#legacy-old: 10.1.11.212:5900 password=123456

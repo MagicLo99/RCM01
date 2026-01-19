@@ -1,0 +1,23 @@
+{
+  "lab-main": {
+    "target": "10.1.11.212:5900",
+    "password": "123456",
+    "name": "Lab PC - Main Workstation",
+    "description": "Primary development machine",
+    "color": "#2ecc71"
+  },
+  "test-win10": {
+    "target": "10.1.11.212:5900",
+    "password": "123456",
+    "name": "Test Server - Windows 10",
+    "description": "Testing environment",
+    "color": "#3498db"
+  },
+  "legacy-old": {
+    "target": "10.1.11.212:5900",
+    "password": "123456",
+    "name": "Old Legacy Server",
+    "description": "Legacy production system",
+    "color": "#e74c3c"
+  }
+}

@@ -26,9 +26,14 @@
     // Browser → ws:// → websockify → tcp 5900
     
     // Examples of websocket URLs (choose one):
-    
+
+    const PROXY_HOST = '10.1.11.16';
+    const PROXY_PORT = 6080;
+    const TOKEN = 'mymachine';   // ← your token from the token file
+
+    const url = `ws://${PROXY_HOST}:${PROXY_PORT}/?token=${TOKEN}`;
     // 1. If you run your own websockify on same machine:
-    const url = 'ws://10.1.11.16:6080';
+    // const url = 'ws://10.1.11.16:6080';
     
     // 2. If someone exposed websockify publicly (not very secure with just password!)
     // const url = 'wss://your-websockify-domain:443';  // ← most common in practice
@@ -50,8 +55,6 @@
         clipViewport: false,       // usually false when scaling
         shared: true,
         view_only: false,           // ← allows mouse & keyboard
-        scaleViewport: true,
-        resizeSession: true,
         show_dot: true
       });
 
