@@ -2,9 +2,19 @@
 # Format: token: target_host:target_port
 # Space after colon is REQUIRED!
 
-lab-main: 10.1.11.212:5900
-test-win10: 10.1.11.212:5900
-legacy-old: 10.1.11.212:5900
+Server01: 10.1.11.212:5900
+Server02: 10.1.11.212:5900
+Server03: 10.1.11.212:5900
+Server04: 10.1.11.212:5900
+Server05: 10.1.11.212:5900
+Server06: 10.1.11.212:5900
+Server07: 10.1.11.212:5900
+Server08: 10.1.11.212:5900
+Server09: 10.1.11.212:5900
+Server10: 10.1.11.212:5900
+Server11: 10.1.11.212:5900
+Server12: 10.1.11.212:5900
+
 
 # Optional: you can add password if your websockify version supports it
 # (not all versions do, so test first)

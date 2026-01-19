@@ -88,8 +88,7 @@ fetch('config.json')
           ${server.name || token.replace(/-/g, ' ').toUpperCase()}
         </div>
         <div class="card-body">
-          <strong>Target:</strong> ${server.target}<br>
-          <div class="card-token">Token: ${token}</div>
+          <div class="card-token">ID: ${token}</div>
           <small>${server.description || ''}</small>
         </div>
       `;

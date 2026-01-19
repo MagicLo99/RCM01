@@ -1,23 +1,34 @@
 {
-  "lab-main": {
-    "target": "10.1.11.212:5900",
-    "password": "123456",
+  "Server01": {
     "name": "Lab PC - Main Workstation",
-    "description": "Primary development machine",
-    "color": "#2ecc71"
+    "description": "Primary development machine"
   },
-  "test-win10": {
-    "target": "10.1.11.212:5900",
-    "password": "123456",
+  "Server02": {
     "name": "Test Server - Windows 10",
-    "description": "Testing environment",
-    "color": "#3498db"
+    "description": "Testing environment"
   },
-  "legacy-old": {
-    "target": "10.1.11.212:5900",
-    "password": "123456",
+  "Server03": {
     "name": "Old Legacy Server",
-    "description": "Legacy production system",
-    "color": "#e74c3c"
+    "description": "Legacy production system"
+  },
+  "Server04": {
+    "name": "Old Legacy Server",
+    "description": "Legacy production system"
+  },
+  "Server05": {
+    "name": "Old Legacy Server",
+    "description": "Legacy production system"
+  },
+  "Server06": {
+    "name": "Old Legacy Server",
+    "description": "Legacy production system"
+  },
+  "Server07": {
+    "name": "Old Legacy Server",
+    "description": "Legacy production system"
+  },
+  "Server08": {
+    "name": "Old Legacy Server",
+    "description": "Legacy production system"
   }
 }
