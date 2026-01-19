@@ -27,7 +27,7 @@
       min-width: 200px;
     }
     #controls {
-      position: fixed;
+      position: absolute;
       bottom: 12px;
       left: 12px;
       background: rgba(0,0,0,0.75);
@@ -90,6 +90,7 @@
     status.textContent = text;
     status.style.color = color;
   }
+  
 
   function connect() {
     if (rfb) {
@@ -104,18 +105,24 @@
       rfb = new RFB(screen, wsUrl, {
         // credentials: { password: '123456' },
         // credentials: '123456',          // password handled server-side via token config
-        scaleViewport: true,
         resizeSession: true,
         clipViewport: false,
-        shared: true,
-        view_only: false,
+        qualityLevel: 6,
+        compressionLevel: 5,
+        // shared: true,
         show_dot: true
       });
 
       rfb.addEventListener('connect', () => {
+        rfb.scaleViewport = true;
         showStatus('Connected ✓', '#00ff88');
         disconnectBtn.style.display = 'inline-block';
         setTimeout(() => status.style.opacity = '0', 4000);
+        // Hide after 3 seconds of connection
+        setTimeout(() => {
+          controls.style.opacity = '0';
+          controls.style.pointerEvents = 'none';
+        }, 3000);
       });
 
       rfb.addEventListener('disconnect', (e) => {
@@ -165,6 +172,7 @@
     }
   }
 
+
   // Disconnect button
   disconnectBtn.onclick = () => {
     if (rfb) {
@@ -178,6 +186,28 @@
       if (rfb) rfb.sendCtrlAltDel();
       e.preventDefault();
     }
+  });
+
+  // Show on hover near edges or any click
+  document.addEventListener('mousemove', (e) => {
+    const nearEdge = e.clientY < 100 || e.clientY > window.innerHeight - 100;
+    if (nearEdge) {
+      controls.style.opacity = '1';
+      controls.style.pointerEvents = 'auto';
+      setTimeout(() => {
+        controls.style.opacity = '0';
+        controls.style.pointerEvents = 'none';
+      }, 3000);
+    }
+  });
+
+  document.addEventListener('click', () => {
+    controls.style.opacity = '1';
+    controls.style.pointerEvents = 'auto';
+    // Optional: re-start auto-hide timer
+    setTimeout(() => {
+      controls.style.opacity = '0';
+    }, 5000);
   });
 
   // Auto-connect on load
