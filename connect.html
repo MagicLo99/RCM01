@@ -118,7 +118,7 @@
         showStatus('Connected ✓', '#00ff88');
         disconnectBtn.style.display = 'inline-block';
         setTimeout(() => status.style.opacity = '0', 4000);
-        // Hide after 3 seconds of connection
+        // 3 秒后 controls 自动隐藏
         setTimeout(() => {
           controls.style.opacity = '0';
           controls.style.pointerEvents = 'none';
@@ -190,10 +190,13 @@
 
   // Show on hover near edges or any click
   document.addEventListener('mousemove', (e) => {
-    const nearEdge = e.clientY < 100 || e.clientY > window.innerHeight - 100;
+    // 滑鼠置于左下角才显示 control
+    const nearEdge = e.clientX < 15 && e.clientY > window.innerHeight - 15;
+
     if (nearEdge) {
       controls.style.opacity = '1';
       controls.style.pointerEvents = 'auto';
+      // 3 秒后 controls 自动隐藏
       setTimeout(() => {
         controls.style.opacity = '0';
         controls.style.pointerEvents = 'none';
@@ -201,14 +204,14 @@
     }
   });
 
-  document.addEventListener('click', () => {
-    controls.style.opacity = '1';
-    controls.style.pointerEvents = 'auto';
-    // Optional: re-start auto-hide timer
-    setTimeout(() => {
-      controls.style.opacity = '0';
-    }, 5000);
-  });
+  // document.addEventListener('click', () => {
+  //   controls.style.opacity = '1';
+  //   controls.style.pointerEvents = 'auto';
+  //   // Optional: re-start auto-hide timer
+  //   setTimeout(() => {
+  //     controls.style.opacity = '0';
+  //   }, 5000);
+  // });
 
   // Auto-connect on load
   window.onload = connect;
